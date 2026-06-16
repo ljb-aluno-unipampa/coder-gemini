@@ -12,4 +12,6 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /root
 
-CMD ["tail", "-f", "/dev/null"]
+COPY start-client.sh /usr/local/bin/start-client.sh
+RUN chmod +x /usr/local/bin/start-client.sh
+ENTRYPOINT ["/usr/local/bin/start-client.sh"]

@@ -20,5 +20,6 @@ WORKDIR /app
 
 EXPOSE 5000
 
-# Mantém o container vivo se os scripts ainda não existirem
-CMD ["tail", "-f", "/dev/null"]
+COPY start-gateway.sh /usr/local/bin/start-gateway.sh
+RUN chmod +x /usr/local/bin/start-gateway.sh
+ENTRYPOINT ["/usr/local/bin/start-gateway.sh"]
