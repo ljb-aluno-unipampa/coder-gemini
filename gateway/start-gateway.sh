@@ -41,9 +41,12 @@ cat <<EOF > /etc/kea/kea-dhcp4.conf
 }
 EOF
 
-# 5. Iniciar serviços
 kea-dhcp4 -c /etc/kea/kea-dhcp4.conf &
 kea-ctrl-agent -c /etc/kea/kea-ctrl-agent.conf &
 
-# Mantém rodando
+# Adicionar a inicialização da API
+cd /app
+python3 gwapi.py &
+
+# Mantém o container vivo
 tail -f /dev/null
