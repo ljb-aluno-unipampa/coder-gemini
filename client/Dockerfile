@@ -3,22 +3,13 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    kea-dhcp4-server \
-    kea-ctrl-agent \
-    nftables \
     iproute2 \
     iputils-ping \
+    isc-dhcp-client \
     curl \
     jq \
-    python3 \
-    python3-pip \
-    python3-flask \
-    python3-dotenv \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /root
 
-EXPOSE 5000
-
-# Mantém o container vivo se os scripts ainda não existirem
 CMD ["tail", "-f", "/dev/null"]

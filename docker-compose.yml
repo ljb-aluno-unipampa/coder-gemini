@@ -53,10 +53,12 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: ${WAN_SUBNET}
+        - subnet: 172.31.200.0/24
   lan_net:
     driver: bridge
-    internal: true # Bloqueia o NAT automático do Docker. Isolamento total.
+    internal: true
+    driver_opts:
+      com.docker.network.bridge.name: br-lab-lan
     ipam:
       config:
-        - subnet: ${LAN_SUBNET}
+        - subnet: 192.168.222.0/24
