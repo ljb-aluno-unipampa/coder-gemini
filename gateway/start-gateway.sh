@@ -41,6 +41,28 @@ cat <<EOF > /etc/kea/kea-dhcp4.conf
 }
 EOF
 
+cat <<EOF > /etc/kea/kea-ctrl-agent.conf
+{
+  "Control-agent": {
+    "http-host": "127.0.0.1",
+    "http-port": 8000,
+    "control-sockets": {
+      "dhcp4": {
+        "socket-type": "unix",
+        "socket-name": "/tmp/kea-dhcp4.sock"
+      }
+    },
+    "loggers": [
+      {
+        "name": "kea-ctrl-agent",
+        "output_options": [{ "output": "stdout" }],
+        "severity": "INFO"
+      }
+    ]
+  }
+}
+EOF
+
 kea-dhcp4 -c /etc/kea/kea-dhcp4.conf &
 kea-ctrl-agent -c /etc/kea/kea-ctrl-agent.conf &
 
