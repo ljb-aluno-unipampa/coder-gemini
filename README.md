@@ -11,6 +11,7 @@ O ambiente é inteiramente orquestrado via Docker Compose, dividindo-se em duas 
 * **Gateway (`gateway`):** Atua como o nó central de borda (roteador). Executa o motor DHCP (Kea), o subsistema de filtragem de pacotes (`nftables`) e a API de gerenciamento (`Flask`). Possui duas interfaces: uma conectada à WAN (Internet do Host) e outra dedicada à LAN virtual.
 * **Clientes (`client1`, `client2`):** Containers simulando estações de trabalho na rede local interna. Eles não possuem IPs estáticos definidos pelo Docker; dependem puramente de requisições broadcast (`DHCPDISCOVER`) destinadas ao Gateway para obter conectividade.
 
+```txt
 [ Máquina Host / WAN ]
              │
 ┌──────────────▼────────────────────────────────┐
@@ -30,7 +31,7 @@ O ambiente é inteiramente orquestrado via Docker Compose, dividindo-se em duas 
 │   │  client1  │               │  client2  │   │
 │   └───────────┘               └───────────┘   │
 └───────────────────────────────────────────────┘
-
+```
 
 ---
 
