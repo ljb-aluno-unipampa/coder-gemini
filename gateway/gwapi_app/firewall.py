@@ -9,29 +9,46 @@ class FirewallManager:
         self.state = self.load_state()
 
     def load_state(self):
-        if os.path.exists(STATE_FILE):
-            with open(STATE_FILE, 'r') as f:
-                return json.load(f)
-        return {"default_policy": "drop", "rules": []}
+            default_structure = {"default_policy": "accept", "rules": []} # Temporariamente accept para testes
+            if os.path.exists(STATE_FILE):
+                try:
+                    with open(STATE_FILE, 'r') as f:
+                        content = f.read().strip()
+                        if not content: # Arquivo vazio
+                            return default_structure
+                        return json.loads(content)
+                except Exception:
+                    return default_structure
+            return default_structure
 
     def save_state(self):
         with open(STATE_FILE, 'w') as f:
             json.dump(self.state, f, indent=4)
 
     def apply(self):
-        """Aplica o estado atual ao nftables."""
-        ruleset = [
-            "flush ruleset",
-            "table inet filter {",
-            f"  chain input {{ type filter hook input priority 0; policy {self.state['default_policy']}; }}",
-            "  chain forward { type filter hook forward priority 0; policy accept; }",
-            "}"
-        ]
-        
-        # Adicionar regras customizadas aqui...
-        
-        # Execução segura
-        cmd = ["nft", "-f", "-"]
-        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, text=True)
-        process.communicate(input="\n".join(ruleset))
-        return process.returncode == 0
+            """Aplica o estado atual ao nftables garantindo exceções de infraestrutura."""
+            
+            # Se a política padrão for DROP, precisamos injetar as exceções vitais de sobrevivência do laboratório
+            input_policy = self.state.get('default_policy', 'drop')
+            
+            ruleset = [
+                "flush ruleset",
+                "table inet filter {",
+                "  chain input {",
+                f"    type filter hook input priority 0; policy {input_policy};",
+                "    iifname \"lo\" accept;", # Permite tráfego local interno
+                "    ct state established,related accept;", # Permite respostas a requisições do próprio GW
+                "    udp dport 67-68 accept;", # NUNCA bloqueia o DHCP vindo da LAN
+                "    tcp dport 5000 accept;",  # Permite acessar o painel/API pela rede
+                "  }",
+                "  chain forward {",
+                "    type filter hook forward priority 0; policy accept;",
+                "  }",
+                "}"
+            ]
+            
+            # Execução
+            cmd = ["nft", "-f", "-"]
+            process = subprocess.Popen(cmd, stdin=subprocess.PIPE, text=True)
+            process.communicate(input="\n".join(ruleset))
+            return process.returncode == 0
