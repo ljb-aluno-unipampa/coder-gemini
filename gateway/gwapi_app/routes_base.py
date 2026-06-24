@@ -232,9 +232,9 @@ UI_TEMPLATE = """
 
                 tbody.innerHTML = leases.map(l => `
                     <tr class="hover:bg-gray-700/30">
-                        <td class="py-2 text-gray-300">\${l.hostname}</td>
-                        <td class="py-2 text-blue-400">\${l.ip_address}</td>
-                        <td class="py-2 text-gray-400">\${l.hw_address}</td>
+                        <td class="py-2 text-gray-300">${l.hostname}</td>
+                        <td class="py-2 text-blue-400">${l.ip_address}</td>
+                        <td class="py-2 text-gray-400">${l.hw_address}</td>
                     </tr>
                 `).join('');
             } catch (e) {
@@ -255,11 +255,11 @@ UI_TEMPLATE = """
 
                 tbody.innerHTML = reservations.map(r => `
                     <tr class="hover:bg-gray-700/30">
-                        <td class="py-2 text-gray-300">\${r.hostname}</td>
-                        <td class="py-2 text-purple-400">\${r['ip-address']}</td>
-                        <td class="py-2 text-gray-400">\${r.mac}</td>
+                        <td class="py-2 text-gray-300">${r.hostname}</td>
+                        <td class="py-2 text-purple-400">${r['ip-address']}</td>
+                        <td class="py-2 text-gray-400">${r.mac}</td>
                         <td class="py-2 text-right">
-                            <button onclick="deleteReservation('\${r.mac}')" class="text-red-500 hover:text-red-400 p-1"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deleteReservation('${r.mac}')" class="text-red-500 hover:text-red-400 p-1"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `).join('');
@@ -269,11 +269,11 @@ UI_TEMPLATE = """
         }
 
         async function addReservation() {
-            const host = document.getElementById('res-host').value.strip;
-            const mac = document.getElementById('res-mac').value.strip;
-            const ip = document.getElementById('res-ip').value.strip;
+            const host = document.getElementById('res-host').value.trim();
+            const mac = document.getElementById('res-mac').value.trim();
+            const ip = document.getElementById('res-ip').value.trim();
 
-            const payload = { hostname: document.getElementById('res-host').value, mac: document.getElementById('res-mac').value, ip: document.getElementById('res-ip').value };
+            const payload = { hostname: host, mac: mac, ip: ip };
             
             const res = await fetch('/api/dhcp/reservations', {
                 method: 'POST',
@@ -295,7 +295,7 @@ UI_TEMPLATE = """
 
         async function deleteReservation(mac) {
             if(!confirm("Remover esta reserva?")) return;
-            const res = await fetch(`/api/dhcp/reservations/\${mac}`, {
+            const res = await fetch(`/api/dhcp/reservations/${mac}`, {
                 method: 'DELETE',
                 headers: getHeaders()
             });
@@ -313,9 +313,13 @@ UI_TEMPLATE = """
 
         async function applyFirewall() {
             const policy = document.getElementById('fw-policy').value;
-            // Endpoint de salvar e aplicar o estado do firewall
-            alert("Enviando comando para alterar política do Firewall para: " + policy.toUpperCase());
-            // Integração com o backend do firewall concluído na etapa 5
+            const res = await fetch('/firewall/apply', {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ default_policy: policy })
+            });
+            const data = await res.json();
+            alert(data.success ? "Firewall aplicado com sucesso." : "Falha ao aplicar firewall.");
         }
     </script>
 </body>

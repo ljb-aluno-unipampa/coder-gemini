@@ -30,6 +30,7 @@ class FirewallManager:
             
             # Se a política padrão for DROP, precisamos injetar as exceções vitais de sobrevivência do laboratório
             input_policy = self.state.get('default_policy', 'drop')
+            wan_if = self._detect_wan_if()
             
             ruleset = [
                 "flush ruleset",
@@ -44,6 +45,12 @@ class FirewallManager:
                 "  chain forward {",
                 "    type filter hook forward priority 0; policy accept;",
                 "  }",
+                "}",
+                "table ip nat {",
+                "  chain postrouting {",
+                "    type nat hook postrouting priority 100;",
+                f"    oifname \"{wan_if}\" masquerade;",
+                "  }",
                 "}"
             ]
             
@@ -52,3 +59,10 @@ class FirewallManager:
             process = subprocess.Popen(cmd, stdin=subprocess.PIPE, text=True)
             process.communicate(input="\n".join(ruleset))
             return process.returncode == 0
+
+    def _detect_wan_if(self):
+            try:
+                output = subprocess.check_output(["ip", "route", "show", "default"], text=True)
+                return output.split(" dev ", 1)[1].split()[0]
+            except Exception:
+                return "eth0"

@@ -54,12 +54,15 @@ Para implantar e reproduzir os experimentos deste laboratório, os seguintes com
 └── gateway/
     ├── Dockerfile              # Construção da imagem do Gateway (Ubuntu 24.04 + Kea + nftables)
     ├── start-gateway.sh        # Script automatizado de boot, limpeza de cache e permissões
-    └── gwapi_app/              # Código-fonte do Barramento API e Interface Web
-        ├── gwapi.py            # Inicializador e ponto de entrada do servidor Flask
+    ├── gwapi_app/              # Código-fonte do Barramento API e Interface Web
         ├── auth.py             # Middleware de segurança (HTTP Basic Authentication)
         ├── firewall.py         # Abstração de controle e persistência de regras nftables
         ├── routes_base.py      # Renderizador da Interface Web SPA (Tailwind CSS)
         └── routes_dhcp.py      # Endpoints HTTP para manipulação de Leases e Reservas
+    └── gwapi.py                # Inicializador e ponto de entrada do servidor Flask
+└── client/
+    ├── Dockerfile              # Construção da imagem dos clientes DHCP
+    └── start-client.sh         # Script de solicitação de endereço via DHCP
 ```
 
 ## 4. Instruções de Instalação e Inicialização
@@ -69,7 +72,7 @@ Siga os passos abaixo para construir o ambiente isolado eliminando qualquer pers
 1. Clone o repositório institucional do projeto
 
 ```bash
-git clone [https://github.com/ljb-aluno-unipampa/coder-gemini.git](https://github.com/ljb-aluno-unipampa/coder-gemini.git)
+git clone https://github.com/ljb-aluno-unipampa/coder-gemini.git
 cd coder-gemini
 ```
 
@@ -106,8 +109,9 @@ Consulte o estado atual de concessão de IPs gerados pelos clientes na LAN reali
 
 ```bash
 curl -u admin:Mestrado2026! http://localhost:5000/api/dhcp/leases
-Retorno Esperado (Formato JSON):
 ```
+
+Retorno Esperado (Formato JSON):
 
 ```json
 [

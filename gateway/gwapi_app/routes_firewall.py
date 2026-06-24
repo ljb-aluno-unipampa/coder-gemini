@@ -16,5 +16,10 @@ def manage_rules():
 @fw_bp.route('/firewall/apply', methods=['POST'])
 @requires_auth
 def apply_firewall():
+    data = request.get_json(silent=True) or {}
+    policy = data.get('default_policy')
+    if policy in ('accept', 'drop'):
+        fm.state['default_policy'] = policy
+        fm.save_state()
     success = fm.apply()
     return jsonify({"success": success})
