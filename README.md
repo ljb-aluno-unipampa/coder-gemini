@@ -39,9 +39,27 @@ O ambiente é inteiramente orquestrado via Docker Compose, dividindo-se em duas 
 
 Para implantar e reproduzir os experimentos deste laboratório, os seguintes componentes devem estar previamente instalados no sistema operacional host:
 
-* **Docker Linux Engine** (v20.10.0 ou superior)
-* **Docker Compose V2** (v2.20.0 ou superior)
-* **Cliente cURL** ou navegador web moderno para testes de interface.
+* **Sistema operacional Linux**, preferencialmente Ubuntu 24.04 ou superior, com suporte ao Docker Engine e redes bridge.
+* **Docker Linux Engine** (v20.10.0 ou superior).
+* **Docker Compose V2** (v2.20.0 ou superior), usando o comando `docker compose`.
+* **Git** para clonar o repositório.
+* **Acesso à Internet durante o build**, para baixar a imagem base `ubuntu:24.04` e pacotes dos repositórios Ubuntu.
+* **Cliente cURL** ou navegador web moderno para testes de API e interface.
+
+Ambiente de desenvolvimento utilizado como referência para validação local:
+
+* **Linux Ubuntu 24 ou superior**
+* **8 GB de memória RAM**
+* **CPU AMD Ryzen 5600X**
+* **Armazenamento SSD**
+
+Componentes como **Kea DHCP**, **Kea Control Agent**, **nftables**, **Python**, **Flask**, **python-dotenv**, `curl`, `jq`, `iproute2` e `isc-dhcp-client` são instalados dentro das imagens Docker descritas em `gateway/Dockerfile` e `client/Dockerfile`. Portanto, não é necessário instalar Python, pacotes pip, Kea ou nftables diretamente no host para executar o laboratório via Docker Compose.
+
+Recursos mínimos práticos para execução do artefato:
+
+* **CPU:** 2 vCPUs ou superior.
+* **Memória:** pelo menos 2 GB livres para build e execução; 8 GB no host de desenvolvimento testado.
+* **Disco:** cerca de 2 GB livres para imagens, camadas e arquivos gerados; SSD recomendado para builds mais rápidos.
 
 ---
 
@@ -50,7 +68,8 @@ Para implantar e reproduzir os experimentos deste laboratório, os seguintes com
 ```text
 .
 ├── docker-compose.yml          # Definição e interconexão dos serviços e redes Docker
-├── .env                        # Variáveis de ambiente globais (Escopos, IPs e Senhas)
+├── .env.example                # Modelo das variáveis de ambiente globais
+├── .env                        # Arquivo local criado a partir do exemplo
 └── gateway/
     ├── Dockerfile              # Construção da imagem do Gateway (Ubuntu 24.04 + Kea + nftables)
     ├── start-gateway.sh        # Script automatizado de boot, limpeza de cache e permissões
@@ -76,19 +95,25 @@ git clone https://github.com/ljb-aluno-unipampa/coder-gemini.git
 cd coder-gemini
 ```
 
-2. Garanta a execução limpa derrubando resquícios de redes anteriores
+2. Crie o arquivo `.env` a partir do exemplo do repositório
+
+```bash
+cp .env.example .env
+```
+
+3. Garanta a execução limpa derrubando resquícios de redes anteriores
 
 ```bash
 docker compose down --remove-orphans
 ```
 
-3. Construa a imagem do Gateway forçando o descarte de cache das camadas
+4. Construa a imagem do Gateway forçando o descarte de cache das camadas
 
 ```bash
 docker compose build --no-cache gateway
 ```
 
-4. Inicie o laboratório de redes em modo de segundo plano (background)
+5. Inicie o laboratório de redes em modo de segundo plano (background)
 
 ```bash
 docker compose up -d
